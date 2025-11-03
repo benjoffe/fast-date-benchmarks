@@ -22,6 +22,7 @@
 #include "algorithms/fliegel_flandern.hpp"
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
+#include "algorithms/joffe.hpp"
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
 #include "algorithms/openjdk.hpp"

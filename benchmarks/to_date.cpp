@@ -15,10 +15,16 @@
 
 #include "algorithms/baum.hpp"
 #include "algorithms/boost.hpp"
+#include "algorithms/boost_joffe_1.hpp"
+#include "algorithms/boost_joffe_2.hpp"
 #include "algorithms/dotnet.hpp"
 #include "algorithms/fliegel_flandern.hpp"
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
+#include "algorithms/joffe.hpp"
+#include "algorithms/joffe_eras.hpp"
+#include "algorithms/joffe_eras_bitapprox.hpp"
+//#include "algorithms/joffe_fast64bit.hpp" // disabled due to only working on Mac
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
 #include "algorithms/openjdk.hpp"
@@ -65,14 +71,20 @@ void time(benchmark::State& state) {
   }
 }
 
-BENCHMARK(time<scan               >);
-BENCHMARK(time<baum               >);
-BENCHMARK(time<boost              >);
-BENCHMARK(time<dotnet             >);
-BENCHMARK(time<fliegel_flandern   >);
-BENCHMARK(time<glibc              >);
-BENCHMARK(time<hatcher            >);
-BENCHMARK(time<libcxx             >);
-BENCHMARK(time<openjdk            >);
-BENCHMARK(time<reingold_dershowitz>);
-BENCHMARK(time<neri_schneider     >);
+BENCHMARK(time<scan                >);
+BENCHMARK(time<baum                >);
+BENCHMARK(time<boost               >);
+BENCHMARK(time<boost_joffe_1       >);
+BENCHMARK(time<boost_joffe_2       >);
+BENCHMARK(time<dotnet              >);
+BENCHMARK(time<fliegel_flandern    >);
+BENCHMARK(time<glibc               >);
+BENCHMARK(time<hatcher             >);
+BENCHMARK(time<joffe               >);
+BENCHMARK(time<joffe_eras          >);
+BENCHMARK(time<joffe_eras_bitapprox>);
+//BENCHMARK(time<joffe_fast64bit     >); // works on Mac, disabled by default
+BENCHMARK(time<libcxx              >);
+BENCHMARK(time<openjdk             >);
+BENCHMARK(time<reingold_dershowitz >);
+BENCHMARK(time<neri_schneider      >);

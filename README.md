@@ -1,3 +1,17 @@
+# Fast Date Benchmarks
+
+This repository is a fork of the Neri-Schneider EAF repository, modified as supplementary
+material for the blog post: https://www.benjoffe.com/fast-date.
+
+**Note:** When benchmarking the fastest algorithms against the original Neri-Schneider algorithm,
+if the differences are under ~10% then they may be subject to noise. You can improve reproducibility by editing
+`benchmarks/to_date.cpp` to repeat tests multiple times, or remove outliers.
+
+All text that follows in this README is taken from the original Neri-Schneider repository, which
+you can view here: https://github.com/cassioneri/eaf
+
+---
+
 # EAF
 
 This repository contains the supplementary material to:

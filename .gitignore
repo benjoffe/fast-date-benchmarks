@@ -2,3 +2,5 @@ build/
 tp/
 .vs/
 out/
+
+.DS_Store

@@ -20,6 +20,7 @@
 #include "algorithms/fliegel_flandern.hpp"
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
+#include "algorithms/joffe.hpp"
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
 #include "algorithms/openjdk.hpp"
@@ -66,14 +67,15 @@ void time(benchmark::State& state) {
   }
 }
 
-BENCHMARK(time<scan               >);
-BENCHMARK(time<baum               >);
-BENCHMARK(time<boost              >);
-BENCHMARK(time<dotnet             >);
-BENCHMARK(time<fliegel_flandern   >);
-BENCHMARK(time<glibc              >);
-BENCHMARK(time<hatcher            >);
-BENCHMARK(time<libcxx             >);
-BENCHMARK(time<openjdk            >);
-BENCHMARK(time<reingold_dershowitz>);
-BENCHMARK(time<neri_schneider     >);
+BENCHMARK(time<scan                >);
+BENCHMARK(time<baum                >);
+BENCHMARK(time<boost               >);
+BENCHMARK(time<dotnet              >);
+BENCHMARK(time<fliegel_flandern    >);
+BENCHMARK(time<glibc               >);
+BENCHMARK(time<hatcher             >);
+BENCHMARK(time<joffe               >);
+BENCHMARK(time<libcxx              >);
+BENCHMARK(time<openjdk             >);
+BENCHMARK(time<reingold_dershowitz >);
+BENCHMARK(time<neri_schneider      >);
