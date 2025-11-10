@@ -22,11 +22,12 @@
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
 #include "algorithms/joffe.hpp"
-#include "algorithms/joffe_eras.hpp"
-#include "algorithms/joffe_eras_bitapprox.hpp"
+#include "algorithms/joffe_buckets.hpp"
+#include "algorithms/joffe_buckets_l1.hpp"
 //#include "algorithms/joffe_fast64bit.hpp" // disabled due to only working on Mac
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
+#include "algorithms/neri_schneider_eras.hpp"
 #include "algorithms/openjdk.hpp"
 #include "algorithms/reingold_dershowitz.hpp"
 #include "eaf/date.hpp"
@@ -81,10 +82,10 @@ BENCHMARK(time<fliegel_flandern    >);
 BENCHMARK(time<glibc               >);
 BENCHMARK(time<hatcher             >);
 BENCHMARK(time<joffe               >);
-BENCHMARK(time<joffe_eras          >);
-BENCHMARK(time<joffe_eras_bitapprox>);
+BENCHMARK(time<joffe_buckets       >);
 //BENCHMARK(time<joffe_fast64bit     >); // works on Mac, disabled by default
 BENCHMARK(time<libcxx              >);
+BENCHMARK(time<neri_schneider      >);
+BENCHMARK(time<neri_schneider_eras >);
 BENCHMARK(time<openjdk             >);
 BENCHMARK(time<reingold_dershowitz >);
-BENCHMARK(time<neri_schneider      >);

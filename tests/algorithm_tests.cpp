@@ -23,8 +23,11 @@
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
 #include "algorithms/joffe.hpp"
+#include "algorithms/joffe_buckets.hpp"
+#include "algorithms/joffe_buckets_l1.hpp"
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
+#include "algorithms/neri_schneider_eras.hpp"
 #include "algorithms/openjdk.hpp"
 #include "algorithms/reingold_dershowitz.hpp"
 #include "eaf/date.hpp"
@@ -75,8 +78,12 @@ using implementations = ::testing::Types<
   fliegel_flandern,
   glibc,
   hatcher,
+  joffe,
+  joffe_buckets,
+  joffe_buckets_l1,
   libcxx,
   neri_schneider,
+  neri_schneider_eras,
   openjdk,
   reingold_dershowitz
 >;

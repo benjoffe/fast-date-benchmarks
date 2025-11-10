@@ -7,45 +7,61 @@
  * @brief A New Faster Algorithm for Gregorian Date Conversion.
  * 
  * Fast month/day conversion from [1].
- * Full algorithm will be explained in a followup blog post to [2].
+ * Modified as supplementary material to [2]:
  * 
  *     [1] Neri C, and Schneider L, "Euclidean Affine Functions and their
  *     Application to Calendar Algorithms" (2022).
  * 
- *     [2] Ben Joffe - "A New Faster Algorithm for Gregorian Date Conversion"
- *     https://www.benjoffe.com/fast-date
+ *     [2] Ben Joffe - "A New Faster Overflow-Safe Date Algorithm"
+ *     https://www.benjoffe.com/safe-date
  */
 
-#ifndef EAF_ALGORITHMS_JOFFE_ERAS_BITAPPROX_H
-#define EAF_ALGORITHMS_JOFFE_ERAS_BITAPPROX_H
+#ifndef EAF_ALGORITHMS_JOFFE_BUCKETS_L1_H
+#define EAF_ALGORITHMS_JOFFE_BUCKETS_L1_H
 
 #include "eaf/date.hpp"
 
 #include <stdint.h>
 
-struct joffe_eras_bitapprox {
-
-  static uint32_t constexpr K = (719162 + 306 - 3845) * 4 + 3;
-  static uint32_t constexpr L = 14699*400;
-
-  static uint32_t constexpr SHIFT_0 = 7*146097;
-  static uint32_t constexpr SHIFT_1 = 7*400;
+struct joffe_buckets_l1 {
   
   static uint32_t constexpr INVERSE_SHIFT_Y = 400 * 14700;
   static uint32_t constexpr INVERSE_SHIFT_RD = 719162 + 146097 * 14700u + 306;
   
+  static int32_t constexpr OFFSETS[16] = {
+                 // [0-7] Days Shifts
+         719468, // 719468 + 14696 * 146097 - 4 * 3674 * 146097
+     -536040910, // 719468 + 14696 * 146097 - 5 * 3674 * 146097
+    -1072801288, // 719468 + 14696 * 146097 - 6 * 3674 * 146097
+    -1609561666, // 719468 + 14696 * 146097 - 7 * 3674 * 146097
+    -2147206316, // 719468 + 14696 * 146097 - 0 * 3674 * 146097 - 2^32
+     1611000602, // 719468 + 14696 * 146097 - 1 * 3674 * 146097
+     1074240224, // 719468 + 14696 * 146097 - 2 * 3674 * 146097
+      537479846, // 719468 + 14696 * 146097 - 3 * 3674 * 146097
+
+                 // [8-15] Year Shifts.
+              0, // 14696*400 - 4 * 3674 * 400
+       -1469600, // 14696*400 - 5 * 3674 * 400
+       -2939200, // 14696*400 - 6 * 3674 * 400
+       -4408800, // 14696*400 - 7 * 3674 * 400
+        5878400, // 14696*400 - 0 * 3674 * 400
+        4408800, // 14696*400 - 1 * 3674 * 400
+        2939200, // 14696*400 - 2 * 3674 * 400
+        1469600  // 14696*400 - 3 * 3674 * 400
+  };
+
   static inline
   date32_t to_date(int32_t dayNumber) {
 
-    // taking the eras concept further by approximating era with bit-shift
-    // this will be outlined in more detail in a future blog post
-    uint32_t const d0 = dayNumber + 2147483648;
+    uint32_t const uday = static_cast<unsigned>(dayNumber);
+    uint32_t const bucket = uday >> 29; // [0, 7]
+      
+    uint32_t const d_off = OFFSETS[bucket];
+    uint32_t const y_off = OFFSETS[bucket+8];
 
-    uint32_t const bucket = d0 >> 20;
-    
-    uint32_t const days = d0 - SHIFT_0 * bucket;
+    uint32_t const days = dayNumber + d_off;
 
-    uint32_t const qds = days * 4 + K;
+    uint32_t const qds = days * 4 + 3;
     uint32_t const cen = qds / 146097;
     uint32_t const jul = qds - (cen & ~3) + cen * 4;
     uint32_t const yrs = jul / 1461;
@@ -60,7 +76,7 @@ struct joffe_eras_bitapprox {
     uint32_t const day = D + 1;
     uint32_t const month = bump ? M - 12 : M;
     
-    int32_t const year = yrs + bucket * SHIFT_1 + bump - L;
+    int32_t const year = yrs - y_off + bump;
 
     return { year, month, day };
   }
@@ -82,6 +98,6 @@ struct joffe_eras_bitapprox {
     return year_days + month_days + day - (INVERSE_SHIFT_RD + 1);
   }
 
-}; // struct joffe_eras_bitapprox
+}; // struct joffe_buckets_l1
 
-#endif // EAF_ALGORITHMS_JOFFE_ERAS_BITAPPROX_H
+#endif // EAF_ALGORITHMS_JOFFE_BUCKETS_L1_H

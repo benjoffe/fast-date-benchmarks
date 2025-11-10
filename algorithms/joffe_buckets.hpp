@@ -7,51 +7,49 @@
  * @brief A New Faster Algorithm for Gregorian Date Conversion.
  * 
  * Fast month/day conversion from [1].
- * Full algorithm will be explained in a followup blog post to [2].
+ * Modified as supplementary material to [2]:
  * 
  *     [1] Neri C, and Schneider L, "Euclidean Affine Functions and their
  *     Application to Calendar Algorithms" (2022).
  * 
- *     [2] Ben Joffe - "A New Faster Algorithm for Gregorian Date Conversion"
- *     https://www.benjoffe.com/fast-date
+ *     [2] Ben Joffe - "A New Faster Overflow-Safe Date Algorithm"
+ *     https://www.benjoffe.com/safe-date
  */
 
-#ifndef EAF_ALGORITHMS_JOFFE_ERAS_H
-#define EAF_ALGORITHMS_JOFFE_ERAS_H
+#ifndef EAF_ALGORITHMS_JOFFE_BUCKETS_H
+#define EAF_ALGORITHMS_JOFFE_BUCKETS_H
 
 #include "eaf/date.hpp"
 
 #include <stdint.h>
 
-struct joffe_eras {
+struct joffe_buckets {
 
-  static uint32_t constexpr K = (719162 + 306 - 3845) * 4 + 3;
-  static uint32_t constexpr L = 14699 * 400;
+  static uint32_t constexpr K = (719162 + 306 - 3845 - 146097*4) * 4 + 3;
+  static uint32_t constexpr L = 14695*400;
 
+  static uint32_t constexpr SHIFT_0 = 7*146097;
+  static uint32_t constexpr SHIFT_1 = 7*400;
+  
   static uint32_t constexpr INVERSE_SHIFT_Y = 400 * 14700;
   static uint32_t constexpr INVERSE_SHIFT_RD = 719162 + 146097 * 14700u + 306;
-
+  
   static inline
   date32_t to_date(int32_t dayNumber) {
 
-    // using eras similar to C++ Chrono
-    // but, identifying era prior to epoch shift
-    // this gives full bit-coverage
-    // this will be outlined in detail in a future blog post
+    // taking the eras concept further by approximating era with bit-shift
+    // this will be outlined in more detail in a future blog post
     uint32_t const d0 = dayNumber + 2147483648;
 
-    uint32_t const era = d0 / 146097;
+    uint32_t const bucket = d0 >> 20;
     
-    uint32_t const days = (d0 % 146097);
+    uint32_t const days = d0 - SHIFT_0 * bucket;
 
     uint32_t const qds = days * 4 + K;
     uint32_t const cen = qds / 146097;
     uint32_t const jul = qds - (cen & ~3) + cen * 4;
-
-    // Neri-Schneider technique for year and day of year
-    uint64_t const P_2 = uint64_t(2939745) * jul;
-    uint32_t const yrs = uint32_t(P_2 / 4294967296);
-    uint32_t const rem = uint32_t(P_2 % 4294967296) / 2939745 / 4;
+    uint32_t const yrs = jul / 1461;
+    uint32_t const rem = jul % 1461 / 4;
 
     // Neri-Schneider technique for Day & Month:
     uint32_t const N = rem * 2141 + 197913;
@@ -62,7 +60,7 @@ struct joffe_eras {
     uint32_t const day = D + 1;
     uint32_t const month = bump ? M - 12 : M;
     
-    int32_t const year = yrs + era * 400 + bump - L;
+    int32_t const year = yrs + bucket * SHIFT_1 + bump - L;
 
     return { year, month, day };
   }
@@ -84,6 +82,6 @@ struct joffe_eras {
     return year_days + month_days + day - (INVERSE_SHIFT_RD + 1);
   }
 
-}; // struct joffe_eras
+}; // struct joffe_buckets
 
-#endif // EAF_ALGORITHMS_JOFFE_ERAS_H
+#endif // EAF_ALGORITHMS_JOFFE_BUCKETS_H
