@@ -24,7 +24,7 @@
 #include "algorithms/joffe.hpp"
 #include "algorithms/joffe_buckets.hpp"
 #include "algorithms/joffe_buckets_l1.hpp"
-//#include "algorithms/joffe_fast64bit.hpp" // disabled due to only working on Mac
+#include "algorithms/joffe_fast64bit.hpp"
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
 #include "algorithms/neri_schneider_eras.hpp"
@@ -83,7 +83,8 @@ BENCHMARK(time<glibc               >);
 BENCHMARK(time<hatcher             >);
 BENCHMARK(time<joffe               >);
 BENCHMARK(time<joffe_buckets       >);
-//BENCHMARK(time<joffe_fast64bit     >); // works on Mac, disabled by default
+BENCHMARK(time<joffe_buckets_l1    >);
+BENCHMARK(time<joffe_fast64bit     >);
 BENCHMARK(time<libcxx              >);
 BENCHMARK(time<neri_schneider      >);
 BENCHMARK(time<neri_schneider_eras >);
