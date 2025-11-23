@@ -39,27 +39,15 @@ struct benjoffe_article_1 {
     uint32_t const jul = qds - (cen & ~ 3) + cen * 4;
     uint32_t const yrs = jul / 1461;
     uint32_t const rem = (jul % 1461) / 4;
-  
-  #if defined(__aarch64__) || defined(_M_ARM64)
-    uint32_t const shift = 197913;                       
-  #else
-    uint32_t const bump = (rem >= 306);
-    uint32_t const shift = bump ? -588519 : 197913; // underflow
-  #endif
 
     // Neri-Schneider technique for Day and Month
-    uint32_t const N = rem * 2141 + shift;
+    uint32_t const N = rem * 2141 + 197913;
     uint32_t const M = N / 65536;
     uint32_t const D = N % 65536 / 2141;
 
-  #if defined(__aarch64__) || defined(_M_ARM64)
-    uint32_t const bump = M > 12;
-    uint32_t const month = bump ? M - 12 : M;
-  #else
-    uint32_t const month = M;
-  #endif
-
+    uint32_t const bump = rem >= 306;
     uint32_t const day = D + 1;
+    uint32_t const month = bump ? M - 12 : M;
     int32_t const year = (yrs - L) + bump;
 
     return { year, month, day };
