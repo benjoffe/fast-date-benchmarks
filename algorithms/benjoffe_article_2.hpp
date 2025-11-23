@@ -16,23 +16,20 @@
  *     https://www.benjoffe.com/safe-date
  */
 
-#ifndef EAF_ALGORITHMS_JOFFE_BUCKETS_H
-#define EAF_ALGORITHMS_JOFFE_BUCKETS_H
+#ifndef EAF_ALGORITHMS_BENJOFFE_ARTICLE_2_H
+#define EAF_ALGORITHMS_BENJOFFE_ARTICLE_2_H
 
 #include "eaf/date.hpp"
 
 #include <stdint.h>
 
-struct joffe_buckets {
+struct benjoffe_article_2 {
 
   static uint32_t constexpr K = (719162 + 306 - 3845 - 146097*4) * 4 + 3;
   static uint32_t constexpr L = 14695*400;
 
   static uint32_t constexpr SHIFT_0 = 7*146097;
   static uint32_t constexpr SHIFT_1 = 7*400;
-  
-  static uint32_t constexpr INVERSE_SHIFT_Y = 400 * 14700;
-  static uint32_t constexpr INVERSE_SHIFT_RD = 719162 + 146097 * 14700u + 306;
   
   static inline
   date32_t to_date(int32_t dayNumber) {
@@ -59,29 +56,28 @@ struct joffe_buckets {
     uint32_t const bump = (rem >= 306);
     uint32_t const day = D + 1;
     uint32_t const month = bump ? M - 12 : M;
-    
     int32_t const year = yrs + bucket * SHIFT_1 + bump - L;
 
     return { year, month, day };
   }
 
-  // below is identical to joffe.hpp
-  // it is excluded in the to_rata_die benchmark for this reason
+  // The below is identical to benjoffe_fast64.hpp
+  // It is therefore excluded in the to_rata_die benchmarks
   static inline
   int32_t to_rata_die(int32_t year, uint32_t month, uint32_t day) {
 
     uint32_t const bump = month <= 2;
-    uint32_t const yrs = uint32_t(year + INVERSE_SHIFT_Y) - bump;
+    uint32_t const yrs = uint32_t(year + 5880000) - bump;
     uint32_t const cen = yrs / 100;
-    int32_t const phase = bump ? 8829 : -2919;
+    int32_t const shift = bump ? 8829 : -2919;
 
     // Similar to Neri-Scheinder but slightly slower to avoid early overflow:
     uint32_t const year_days = yrs * 365 + yrs / 4 - cen + cen / 4;
-    uint32_t const month_days = (979 * month + phase) / 32;
+    uint32_t const month_days = (979 * int32_t(month) + shift) / 32;
     
-    return year_days + month_days + day - (INVERSE_SHIFT_RD + 1);
+    return year_days + month_days + day - 2148345369u;
   }
 
-}; // struct joffe_buckets
+}; // struct benjoffe_article_2
 
-#endif // EAF_ALGORITHMS_JOFFE_BUCKETS_H
+#endif // EAF_ALGORITHMS_BENJOFFE_ARTICLE_2_H

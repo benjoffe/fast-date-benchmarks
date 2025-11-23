@@ -17,14 +17,14 @@
  *     https://www.benjoffe.com/fast-date
  */
 
-#ifndef EAF_OTHERS_BOOST_JOFFE_1_HPP
-#define EAF_OTHERS_BOOST_JOFFE_1_HPP
+#ifndef EAF_OTHERS_BOOST_BENJOFFE_1_HPP
+#define EAF_OTHERS_BOOST_BENJOFFE_1_HPP
 
 #include "eaf/date.hpp"
 
 #include <cstdint>
 
-struct boost_joffe_1 {
+struct boost_benjoffe_1 {
 
   // Original epoch: 24 November -4713.
   static constexpr int32_t ajustment = 2472632;
@@ -60,4 +60,4 @@ struct boost_joffe_1 {
 
 }; // struct boost
 
-#endif // EAF_OTHERS_BOOST_JOFFE_1_HPP
+#endif // EAF_OTHERS_BOOST_BENJOFFE_1_HPP

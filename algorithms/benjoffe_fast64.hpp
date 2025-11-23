@@ -1,0 +1,145 @@
+// MIT License
+// 
+// Copyright (c) 2025 Ben Joffe - https://www.benjoffe.com/fast-date-64
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#ifndef EAF_ALGORITHMS_BENJOFFE_FAST64_H
+#define EAF_ALGORITHMS_BENJOFFE_FAST64_H
+
+#include "eaf/date.hpp"
+#include "algorithms/_portable_uint128.hpp"
+
+#include <stdint.h>
+
+#if defined(__aarch64__) || defined(_M_ARM64)
+#define IS_ARM 1
+#else
+#define IS_ARM 0
+#endif
+
+struct benjoffe_fast64 {
+
+  // Very fast algorithm.
+  // See the following blog post for explaination and benchmar results:
+  // https://www.benjoffe.com/fast-date-64
+
+  // Shift constants for working with positive numbers.
+  // S = 14704 supports full signed 32-bit input range.
+  // S = 4726498270 is suitable for 64-bit input range.
+  static uint32_t constexpr ERAS = 14704;
+  static uint32_t constexpr D_SHIFT = 146097 * ERAS - 719469;
+  static uint32_t constexpr Y_SHIFT = 400 * ERAS - 1;
+
+#if IS_ARM
+  static uint32_t constexpr SCALE = 1; // ARM benefits from smaller constants
+#else
+  static uint32_t constexpr SCALE = 32;
+#endif
+
+  static uint32_t constexpr SHIFT_0 = 30556 * SCALE;
+  static uint32_t constexpr SHIFT_1 = 5980 * SCALE;
+
+  static uint64_t constexpr C1 = 505054698555331ull;   // floor(2^64*4/146097):
+  static uint64_t constexpr C2 = 50504432782230121ull; // ceil(2^64*4/1461):
+  static uint64_t constexpr C3 = 8619973866219416ull * 32 / SCALE;  // floor(2^64/2140):
+
+
+  /**
+   * Supports full 32-bit input range.
+   * For 64-bit version, see implementation in tests/fast_64_range.cpp
+   */
+  static inline
+  date32_t to_date(int32_t dayNumber) {
+    
+    // 1. Adjust for 100/400 leap year rule.
+    // Reverse day count:
+    uint64_t const rev = D_SHIFT - dayNumber;
+    // Mul-shift to divide by 365.2425:
+    // Note: ARM could be faster with simpler math, but using same
+    // technique everywhere to ensure identical range.
+    uint64_t const cen = uint128_t(C1) * rev >> 64;      
+    // Julian map:
+    uint64_t const jul = rev - cen / 4 + cen;            
+
+    // 2. Determine year and year-part using an EAF numerator.
+    // Mul-shift to divide by 365.25:
+    // Note: ARM could be faster with simpler math, but using same
+    // technique everywhere to ensure identical range.
+    uint128_t const num = uint128_t(C2) * jul; 
+    uint32_t const yrs = Y_SHIFT - uint32_t(num >> 64); // Forward year 
+    uint64_t const low = uint64_t(num);         // Remainder
+    
+    // Year-part:
+    // EAF technique similar to Neri-Schneider, but instead of
+    // calculating day-of-year, we calculate an input to `N`.
+    uint32_t const ypt = uint32_t(uint128_t(24451 * SCALE) * low >> 64);
+
+  #if IS_ARM
+    // Perform bump later for faster code on Apple Silicon.
+    uint32_t const shift = SHIFT_0;
+  #else
+    uint32_t const bump = ypt < (3952 * SCALE);      // Jan or Feb
+    uint32_t const shift = bump ? SHIFT_1 : SHIFT_0; // Shift offset
+  #endif
+
+    // 3. Year-modulo-bitshift for leap years,
+    // also revert to forward direction.
+    uint32_t const N = (yrs % 4) * (16 * SCALE) + shift - ypt;
+    uint32_t const M = N / (2048 * SCALE);
+    uint32_t const D = uint32_t(uint128_t(C3) * (N % (2048 * SCALE)) >> 64);
+    //uint32_t const D = N % (2048 * SCALE) / 2140;
+
+  #if IS_ARM
+    uint32_t const bump = M > 12;             // Jan or Feb:
+    uint32_t const month = bump ? M - 12 : M; // Single-cycle on ARM:    
+  #else
+    uint32_t const month = M; // Already correct due to prior shift
+  #endif
+
+    // Normalize from 0-index to 1-index Day:
+    uint32_t const day = D + 1;
+    // Overflow year when Jan or Feb:
+    int32_t const year = yrs + bump;
+
+    return date32_t{year, month, day};
+  }
+
+  // Fast overflow-safe inverse function.
+  // Accurate over the full signed 32-bit output range.
+  static inline
+  int32_t to_rata_die(int32_t year, uint32_t month, uint32_t day) {
+
+    uint32_t const bump = month <= 2;
+    uint32_t const yrs = uint32_t(year + 5880000) - bump;
+    uint32_t const cen = yrs / 100;
+    int32_t const shift = bump ? 8829 : -2919;
+
+    // Similar to Neri-Scheinder but slightly slower to avoid early overflow:
+    uint32_t const year_days = yrs * 365 + yrs / 4 - cen + cen / 4;
+    uint32_t const month_days = (979 * int32_t(month) + shift) / 32;
+    
+    return year_days + month_days + day - 2148345369u;
+  }
+
+}; // struct benjoffe_fast64
+
+#undef IS_ARM
+
+#endif // EAF_ALGORITHMS_BENJOFFE_FAST64_H

@@ -16,21 +16,18 @@
  *     https://www.benjoffe.com/fast-date
  */
 
-#ifndef EAF_ALGORITHMS_JOFFE_H
-#define EAF_ALGORITHMS_JOFFE_H
+#ifndef EAF_ALGORITHMS_BENJOFFE_ARTICLE_1_H
+#define EAF_ALGORITHMS_BENJOFFE_ARTICLE_1_H
 
 #include "eaf/date.hpp"
 
 #include <stdint.h>
 
-struct joffe {
+struct benjoffe_article_1 {
 
   static uint32_t constexpr s = 82;
   static uint32_t constexpr K = 719162 + 146097 * s + 306;
   static uint32_t constexpr L = 400 * s;
-
-  static uint32_t constexpr INVERSE_SHIFT_Y = 400 * 14700;
-  static uint32_t constexpr INVERSE_SHIFT_RD = 719162 + 146097 * 14700u + 306;
 
   static inline
   date32_t to_date(int32_t dayNumber) {
@@ -42,34 +39,49 @@ struct joffe {
     uint32_t const jul = qds - (cen & ~ 3) + cen * 4;
     uint32_t const yrs = jul / 1461;
     uint32_t const rem = (jul % 1461) / 4;
+  
+  #if defined(__aarch64__) || defined(_M_ARM64)
+    uint32_t const shift = 197913;                       
+  #else
+    uint32_t const bump = (rem >= 306);
+    uint32_t const shift = bump ? -588519 : 197913; // underflow
+  #endif
 
-    uint32_t const N = rem * 2141 + 197913;
+    // Neri-Schneider technique for Day and Month
+    uint32_t const N = rem * 2141 + shift;
     uint32_t const M = N / 65536;
     uint32_t const D = N % 65536 / 2141;
 
-    uint32_t const bump = (rem >= 306);
-    uint32_t const day = D + 1;
+  #if defined(__aarch64__) || defined(_M_ARM64)
+    uint32_t const bump = M > 12;
     uint32_t const month = bump ? M - 12 : M;
+  #else
+    uint32_t const month = M;
+  #endif
+
+    uint32_t const day = D + 1;
     int32_t const year = (yrs - L) + bump;
 
     return { year, month, day };
   }
 
+  // The below is identical to benjoffe_fast64.hpp
+  // It is therefore excluded in the to_rata_die benchmarks
   static inline
   int32_t to_rata_die(int32_t year, uint32_t month, uint32_t day) {
 
     uint32_t const bump = month <= 2;
-    uint32_t const yrs = uint32_t(year + INVERSE_SHIFT_Y) - bump;
+    uint32_t const yrs = uint32_t(year + 5880000) - bump;
     uint32_t const cen = yrs / 100;
-    int32_t const phase = bump ? 8829 : -2919;
+    int32_t const shift = bump ? 8829 : -2919;
 
     // Similar to Neri-Scheinder but slightly slower to avoid early overflow:
     uint32_t const year_days = yrs * 365 + yrs / 4 - cen + cen / 4;
-    uint32_t const month_days = (979 * month + phase) / 32;
+    uint32_t const month_days = (979 * int32_t(month) + shift) / 32;
     
-    return year_days + month_days + day - (INVERSE_SHIFT_RD + 1);
+    return year_days + month_days + day - 2148345369u;
   }
 
-}; // struct joffe
+}; // struct benjoffe_article_1
 
-#endif // EAF_ALGORITHMS_JOFFE_H
+#endif // EAF_ALGORITHMS_BENJOFFE_ARTICLE_1_H

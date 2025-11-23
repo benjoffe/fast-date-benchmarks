@@ -17,3 +17,8 @@ add_executable(eaf_tests
   eaf_tests.cpp
 )
 target_link_libraries(eaf_tests gtest gtest_main)
+
+add_executable(fast_64_range
+  fast_64_range.cpp
+)
+target_link_libraries(fast_64_range gtest gtest_main)

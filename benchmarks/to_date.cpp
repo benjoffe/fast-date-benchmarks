@@ -14,17 +14,19 @@
  */
 
 #include "algorithms/baum.hpp"
+#include "algorithms/benjoffe_fast64.hpp"
+#include "algorithms/benjoffe_fast32.hpp"
+#include "algorithms/benjoffe_fast32_wide.hpp"
+#include "algorithms/benjoffe_article_1.hpp"
+#include "algorithms/benjoffe_article_2.hpp"
+#include "algorithms/benjoffe_article_2_l1.hpp"
 #include "algorithms/boost.hpp"
-#include "algorithms/boost_joffe_1.hpp"
-#include "algorithms/boost_joffe_2.hpp"
+#include "algorithms/boost_benjoffe_1.hpp"
+#include "algorithms/boost_benjoffe_2.hpp"
 #include "algorithms/dotnet.hpp"
 #include "algorithms/fliegel_flandern.hpp"
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
-#include "algorithms/joffe.hpp"
-#include "algorithms/joffe_buckets.hpp"
-#include "algorithms/joffe_buckets_l1.hpp"
-#include "algorithms/joffe_fast64bit.hpp"
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
 #include "algorithms/neri_schneider_eras.hpp"
@@ -72,21 +74,25 @@ void time(benchmark::State& state) {
   }
 }
 
-BENCHMARK(time<scan                >);
-BENCHMARK(time<baum                >);
-BENCHMARK(time<boost               >);
-BENCHMARK(time<boost_joffe_1       >);
-BENCHMARK(time<boost_joffe_2       >);
-BENCHMARK(time<dotnet              >);
-BENCHMARK(time<fliegel_flandern    >);
-BENCHMARK(time<glibc               >);
-BENCHMARK(time<hatcher             >);
-BENCHMARK(time<joffe               >);
-BENCHMARK(time<joffe_buckets       >);
-BENCHMARK(time<joffe_buckets_l1    >);
-BENCHMARK(time<joffe_fast64bit     >);
-BENCHMARK(time<libcxx              >);
-BENCHMARK(time<neri_schneider      >);
-BENCHMARK(time<neri_schneider_eras >);
-BENCHMARK(time<openjdk             >);
-BENCHMARK(time<reingold_dershowitz >);
+
+BENCHMARK(time<scan                  >);
+BENCHMARK(time<boost                 >);
+BENCHMARK(time<neri_schneider        >);
+BENCHMARK(time<benjoffe_fast64       >);
+BENCHMARK(time<benjoffe_fast32       >);
+BENCHMARK(time<benjoffe_fast32_wide  >);
+BENCHMARK(time<benjoffe_article_1    >);
+BENCHMARK(time<benjoffe_article_2    >);
+BENCHMARK(time<benjoffe_article_2_l1 >);
+BENCHMARK(time<baum                  >);
+BENCHMARK(time<boost_benjoffe_1      >);
+BENCHMARK(time<boost_benjoffe_2      >);
+BENCHMARK(time<dotnet                >);
+BENCHMARK(time<fliegel_flandern      >);
+BENCHMARK(time<glibc                 >);
+BENCHMARK(time<hatcher               >);
+BENCHMARK(time<libcxx                >);
+BENCHMARK(time<neri_schneider        >);
+BENCHMARK(time<neri_schneider_eras   >);
+BENCHMARK(time<openjdk               >);
+BENCHMARK(time<reingold_dershowitz   >);

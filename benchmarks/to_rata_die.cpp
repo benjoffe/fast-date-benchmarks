@@ -20,7 +20,7 @@
 #include "algorithms/fliegel_flandern.hpp"
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
-#include "algorithms/joffe.hpp"
+#include "algorithms/benjoffe_fast64.hpp"
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
 #include "algorithms/openjdk.hpp"
@@ -74,7 +74,7 @@ BENCHMARK(time<dotnet              >);
 BENCHMARK(time<fliegel_flandern    >);
 BENCHMARK(time<glibc               >);
 BENCHMARK(time<hatcher             >);
-BENCHMARK(time<joffe               >);
+BENCHMARK(time<benjoffe_fast64     >);
 BENCHMARK(time<libcxx              >);
 BENCHMARK(time<openjdk             >);
 BENCHMARK(time<reingold_dershowitz >);

@@ -17,15 +17,19 @@
 #include "tests/tests.hpp"
 
 #include "algorithms/baum.hpp"
+#include "algorithms/benjoffe_fast64.hpp"
+#include "algorithms/benjoffe_fast32.hpp"
+#include "algorithms/benjoffe_fast32_wide.hpp"
+#include "algorithms/benjoffe_article_1.hpp"
+#include "algorithms/benjoffe_article_2.hpp"
+#include "algorithms/benjoffe_article_2_l1.hpp"
 #include "algorithms/boost.hpp"
+#include "algorithms/boost_benjoffe_1.hpp"
+#include "algorithms/boost_benjoffe_2.hpp"
 #include "algorithms/dotnet.hpp"
 #include "algorithms/fliegel_flandern.hpp"
 #include "algorithms/glibc.hpp"
 #include "algorithms/hatcher.hpp"
-#include "algorithms/joffe.hpp"
-#include "algorithms/joffe_buckets.hpp"
-#include "algorithms/joffe_buckets_l1.hpp"
-#include "algorithms/joffe_fast64bit.hpp"
 #include "algorithms/libcxx.hpp"
 #include "algorithms/neri_schneider.hpp"
 #include "algorithms/neri_schneider_eras.hpp"
@@ -74,14 +78,19 @@ struct algorithm_tests : public ::testing::Test {
 
 using implementations = ::testing::Types<
   baum,
+  benjoffe_fast64,
+  benjoffe_fast32,
+  benjoffe_fast32_wide,
+  benjoffe_article_1,
+  benjoffe_article_2,
+  benjoffe_article_2_l1,
   boost,
+  boost_benjoffe_1,
+  boost_benjoffe_2,
   dotnet,
   fliegel_flandern,
   glibc,
   hatcher,
-  joffe,
-  joffe_buckets,
-  joffe_buckets_l1,
   libcxx,
   neri_schneider,
   neri_schneider_eras,
