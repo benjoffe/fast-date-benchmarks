@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSL-1.0
 // Copyright (c) 2025 Ben Joffe - https://www.benjoffe.com/fast-date-64
 
 #include "eaf/date.hpp"
@@ -25,7 +25,7 @@
  * 2. Use the larger constant for ERAS to use a wider range.
  * 3. 64-bit intermediaries where required.
  */
-inline date64_t joffe_backwards_64_to_date(int64_t dayNumber)
+inline date64_t benjoffe_fast64_wide(int64_t dayNumber)
 {
   static uint64_t constexpr ERAS    = 4726498270ull;
   static uint64_t constexpr D_SHIFT = 146097ull * ERAS - 719469ull;
@@ -149,7 +149,7 @@ int main()
       
       int64_t z = UP_START + i;
 
-      date64_t j = joffe_backwards_64_to_date(z);
+      date64_t j = benjoffe_fast64_wide(z);
       date64_t h = neri_schneider_to_date(z);
 
       if (i % output_freq == 0) {
@@ -180,7 +180,7 @@ int main()
         
       int64_t z = DOWN_START - i;
 
-      date64_t j = joffe_backwards_64_to_date(z);
+      date64_t j = benjoffe_fast64_wide(z);
       date64_t h = neri_schneider_to_date(z);
 
       if (i % output_freq == 0) {
@@ -209,7 +209,7 @@ int main()
   {
     for (int64_t z = -(1ll << 32); z <= (1ll << 32); ++z) {
 
-      date64_t j = joffe_backwards_64_to_date(z);
+      date64_t j = benjoffe_fast64_wide(z);
       date64_t h = neri_schneider_to_date(z);
 
       if (z % output_freq == 0) {
@@ -237,7 +237,7 @@ int main()
 
   for (uint64_t i = 0; i < (1ll << 32); ++i) {
     int64_t z = dist(rng);
-    date64_t j = joffe_backwards_64_to_date(z);
+    date64_t j = benjoffe_fast64_wide(z);
     date64_t h = neri_schneider_to_date(z);
 
     if (!same_ymd(j, h)) {
@@ -260,7 +260,7 @@ int main()
   std::cout << "STARTING FULL DATE SEARCH (this will take a very long time):\n";
 
   for (int64_t z = DOWN_START; z < UP_START; ++z) {
-    date64_t j = joffe_backwards_64_to_date(z);
+    date64_t j = benjoffe_fast64_wide(z);
     date64_t h = neri_schneider_to_date(z);
 
     if (!same_ymd(j, h)) {
