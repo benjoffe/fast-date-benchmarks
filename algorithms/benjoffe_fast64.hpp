@@ -109,7 +109,6 @@ struct benjoffe_fast64 {
     uint32_t const N = (yrs % 4) * (16 * SCALE) + shift - ypt;
     uint32_t const M = N / (2048 * SCALE);
     uint32_t const D = uint32_t(uint128_t(C3) * (N % (2048 * SCALE)) >> 64);
-    //uint32_t const D = N % (2048 * SCALE) / 2140;
 
   #if IS_ARM
     uint32_t const bump = M > 12;             // Jan or Feb:
