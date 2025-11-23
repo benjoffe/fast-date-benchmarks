@@ -37,18 +37,19 @@
 struct benjoffe_fast64 {
 
   // Very fast algorithm.
-  // See the following blog post for explaination and benchmar results:
+  // See the following blog post for explanation and benchmark results:
   // https://www.benjoffe.com/fast-date-64
 
   // Shift constants for working with positive numbers.
-  // S = 14704 supports full signed 32-bit input range.
-  // S = 4726498270 is suitable for 64-bit input range.
+  // ERAS = 14704 supports full signed 32-bit input range.
+  // ERAS = 4726498270 is suitable for 64-bit input range.
   static uint32_t constexpr ERAS = 14704;
   static uint32_t constexpr D_SHIFT = 146097 * ERAS - 719469;
   static uint32_t constexpr Y_SHIFT = 400 * ERAS - 1;
 
 #if IS_ARM
-  static uint32_t constexpr SCALE = 1; // ARM benefits from smaller constants
+  // ARM benefits from smaller constants
+  static uint32_t constexpr SCALE = 1;
 #else
   static uint32_t constexpr SCALE = 32;
 #endif
@@ -56,9 +57,9 @@ struct benjoffe_fast64 {
   static uint32_t constexpr SHIFT_0 = 30556 * SCALE;
   static uint32_t constexpr SHIFT_1 = 5980 * SCALE;
 
-  static uint64_t constexpr C1 = 505054698555331ull;   // floor(2^64*4/146097):
+  static uint64_t constexpr C1 = 505054698555331ull; // floor(2^64*4/146097):
   static uint64_t constexpr C2 = 50504432782230121ull; // ceil(2^64*4/1461):
-  static uint64_t constexpr C3 = 8619973866219416ull * 32 / SCALE;  // floor(2^64/2140):
+  static uint64_t constexpr C3 = 8619973866219416ull * 32 / SCALE; // floor(2^64/2140):
 
 
   /**

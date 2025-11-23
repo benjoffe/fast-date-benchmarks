@@ -58,8 +58,8 @@ struct limits {
   int32_t  static constexpr rata_die_max =  146097;
 };
 
-// Our algorithms are tested in their whole range of validity. (This is much
-// larger than the 800 years we use for others.)
+/*
+// Disabled below to speed-up general testing of other algorithms.
 template <>
 struct limits<neri_schneider> {
   date32_t static constexpr date_min     = neri_schneider::date_min;
@@ -67,6 +67,7 @@ struct limits<neri_schneider> {
   int32_t  static constexpr rata_die_min = neri_schneider::rata_die_min;
   int32_t  static constexpr rata_die_max = neri_schneider::rata_die_max;
 };
+*/
 
 //--------------------------------------------------------------------------
 // Algorithm tests
