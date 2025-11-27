@@ -39,6 +39,15 @@
 
 struct benjoffe_fast32 {
 
+  // Very fast 32-bit algorithm.
+  // Not quite as fast as the 64-bit variant, but close.
+  //
+  // Julian Map technique explained in:
+  // [1] https://www.benjoffe.com/fast-date
+  //
+  // Backwards-counting technique explained in:
+  // [3] https://www.benjoffe.com/fast-date-64
+
   // Sufficient eras to cover C++ Chrono Year
   // i.e. support at least -2^16 years:
   static uint32_t constexpr ERAS = 82;
@@ -47,15 +56,24 @@ struct benjoffe_fast32 {
   // Year shift:
   static uint32_t constexpr Y_SHIFT = 400 * ERAS - 1;
 
+  static uint32_t constexpr C1 = 3853261555; // floor(2^47*4/146097)
+  static uint32_t constexpr C2 = 3010298776; // ceil(2^40*4/1461)
+  static uint32_t constexpr C3 = 2006057;    // ceil(2^32/2141)
+
   static inline
   date32_t to_date(int32_t dayNumber) {
       
-    // Backwards counting technique explained in article [3]:
+    // 1. Adjust for 100/400 leap year rule.
+    // Reverse day count technique explained in article [3]
     uint32_t const rev = D_SHIFT - dayNumber;
-    uint32_t const cen = rev * 3853261555ull >> 47;
+    // Mul-shift to divide by 36524.25 (days per average century):
+    uint32_t const cen = rev * uint64_t(C1) >> 47;
     // Julian map technique explained in article [2]:
     uint32_t const jul = rev + cen - cen / 4;
-    uint32_t const yrs = (jul * 3010298776ull) >> 40; // 2^40*4/146097 = 30103605.9
+    
+    // 2. Determine year and day-of-year using an EAF numerator.
+    // Mul-shift to divide by 365.25:
+    uint32_t const yrs = (jul * uint64_t(C2)) >> 40;
     uint32_t const rem = jul - yrs * 1461 / 4;
 
   #if IS_ARM
@@ -71,7 +89,7 @@ struct benjoffe_fast32 {
     // a 32-bit-optimised mul/shift.
     uint32_t const N = shift - rem * 2141;
     uint32_t const M = N / 65536;
-    uint32_t const D = ((N % 65536) * 2006057ull) >> 32;
+    uint32_t const D = ((N % 65536) * uint64_t(C3)) >> 32;
 
   #if IS_ARM
     uint32_t const bump = M > 12;

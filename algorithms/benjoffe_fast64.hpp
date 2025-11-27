@@ -76,7 +76,7 @@ struct benjoffe_fast64 {
     // 1. Adjust for 100/400 leap year rule.
     // Reverse day count:
     uint64_t const rev = D_SHIFT - dayNumber;
-    // Mul-shift to divide by 365.2425:
+    // Mul-shift to divide by 36524.25 (days per average century):
     // Note: ARM could be faster with simpler math, but using same
     // technique everywhere to ensure identical range.
     uint64_t const cen = uint128_t(C1) * rev >> 64;      

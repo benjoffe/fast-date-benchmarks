@@ -39,6 +39,19 @@
 
 struct benjoffe_fast32_wide {
 
+  // Fast wide 32-bit algorithm.
+  // Supports full signed 32-bit input range, using
+  // only 32-bit arithmetic.
+  //
+  // Julian Map technique explained in:
+  // [1] https://www.benjoffe.com/fast-date
+  //
+  // Bucket technique explained in:
+  // [2] https://www.benjoffe.com/safe-date
+  //
+  // Backwards-counting technique explained in:
+  // [3] https://www.benjoffe.com/fast-date-64
+
   static uint32_t constexpr D_SHIFT = 146097*5 - 719162 - 307 + 3845;
   // Note: 14694 is intentional (see article [2])
   static uint32_t constexpr Y_SHIFT = 14694*400 + 1;
@@ -49,19 +62,29 @@ struct benjoffe_fast32_wide {
   static uint32_t constexpr BUCK_Y = 400;
   static uint32_t constexpr BUCK_D = 146097;
 
+  static uint32_t constexpr C1 = 3853261555; // floor(2^47*4/146097)
+  static uint32_t constexpr C2 = 3010298776; // ceil(2^40*4/1461)
+  static uint32_t constexpr C3 = 2006057;    // ceil(2^32/2141)
+
   static inline
   date32_t to_date(int32_t dayNumber) {
     
     uint32_t const d0 = dayNumber + 2147483648;
 
-    // Bucket technique explained in article [2]
     uint32_t const bucket = d0 >> 17;
 
-    // Backwards counting technique explained in article [3]
+    // 1. Adjust for 100/400 leap year rule.
+    // Bucket technique explained in article [2]
+    // Reverse day count technique explained in article [3]
     uint32_t const rev = bucket*BUCK_D - d0 + D_SHIFT;
-    uint32_t const cen = rev * 3853261555ull >> 47;   // 2^47*4/146097 = 3853261555.1
+    // Mul-shift to divide by 36524.25 (days per average century):
+    uint32_t const cen = rev * uint64_t(C1) >> 47;
+    // Julian map technique explained in article [2]:
     uint32_t const jul = rev + cen - cen / 4;
-    uint32_t const yrs = (jul * 3010298776ull) >> 40; // 2^40*4/146097 = 30103605.9
+    
+    // 2. Determine year and day-of-year using an EAF numerator.
+    // Mul-shift to divide by 365.25:
+    uint32_t const yrs = jul * uint64_t(C2) >> 40;
     uint32_t const rem = jul - yrs * 1461 / 4;
 
   #if IS_ARM
@@ -77,7 +100,7 @@ struct benjoffe_fast32_wide {
     // a 32-bit-optimised mul/shift.
     uint32_t const N = shift - rem * 2141;
     uint32_t const M = N / 65536;
-    uint32_t const D = ((N % 65536) * 2006057ull) >> 32;
+    uint32_t const D = ((N % 65536) * uint64_t(C3)) >> 32;
 
   #if IS_ARM
     uint32_t const bump = M > 12;
