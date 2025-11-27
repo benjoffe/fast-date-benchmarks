@@ -11,7 +11,7 @@ if the differences are under ~10% then they may be subject to noise. You can imp
 
 | System       | Language | Author              | Link                                      |
 |------------- |----------|---------------------|-------------------------------------------|
-| Go library   | Go       | Russ Cox            | [xnacly/go-fast-date](https://github.com/xnacly/go-fast-date) |
+| Go library   | Go       | xnacly            | [xnacly/go-fast-date](https://github.com/xnacly/go-fast-date) |
 
 All text that follows in this README is taken from the original Neri-Schneider repository, which
 you can view here: https://github.com/cassioneri/eaf
