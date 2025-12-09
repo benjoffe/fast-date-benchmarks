@@ -13,8 +13,20 @@ add_executable(to_date
 )
 target_link_libraries(to_date benchmark benchmark_main)
 
+add_executable(to_ordinal_date
+  to_ordinal_date.cpp
+  ../algorithms/definitions.cpp
+)
+target_link_libraries(to_ordinal_date benchmark benchmark_main)
+
 add_executable(to_rata_die
   to_rata_die.cpp
   ../algorithms/definitions.cpp
 )
 target_link_libraries(to_rata_die benchmark benchmark_main)
+
+add_executable(leap_tests
+  leap_tests.cpp
+  ../algorithms/definitions.cpp
+)
+target_link_libraries(leap_tests benchmark benchmark_main)
