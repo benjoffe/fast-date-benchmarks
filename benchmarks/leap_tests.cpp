@@ -15,7 +15,7 @@
 using highres = std::chrono::high_resolution_clock;
 
 static std::vector<int32_t> RANDOM_YEARS;
-static constexpr size_t RANDOM_COUNT = 500'000'000; // 100M entries
+static constexpr size_t RANDOM_COUNT = 500'000'000;
 
 inline bool isleap16_textbook(int16_t year)
 {
@@ -98,15 +98,22 @@ inline bool u_isleap32_benjoffe(uint32_t year)
 
 inline bool isleap16_benjoffe(int16_t year)
 {
-  const bool cen_check = uint16_t(uint16_t(year) * 656) < 2624;
+  // 16-bit constant selection thanks to reddit user `sporule`
+  static constexpr uint16_t CEN_MUL = 23593;
+  static constexpr uint16_t CEN_CUTOFF = 2622;
+  static constexpr uint16_t CEN_BIAS = (1ull<<15) / 100 * 100;
+
+  const uint16_t low = uint16_t(year + CEN_BIAS) * CEN_MUL;
+  const bool cen_check = low < CEN_CUTOFF;
   return (year % (cen_check ? 16 : 4)) == 0;
 }
 
 inline bool isleap64_benjoffe(int64_t year)
 {
-  static constexpr uint64_t CEN_MUL = (1ull << 63) / 50ull + 1ull;
-  static constexpr uint64_t CEN_CUTOFF = CEN_MUL * 4ull;
-  static constexpr uint64_t CEN_BIAS = (1ull << 63) / 21ull;
+  // 64-bit constant selection thanks to reddit user `sporule`
+  static constexpr uint64_t CEN_MUL = 1106804644422573097ull;
+  static constexpr uint64_t CEN_CUTOFF = 737869762948382065ull;
+  static constexpr uint64_t CEN_BIAS = (1ull<<63) / 100 * 100;
 
   const uint64_t low = uint64_t(year + CEN_BIAS) * CEN_MUL;
   const bool cen_check = low < CEN_CUTOFF;
@@ -231,7 +238,7 @@ uint64_t run_search(const char* label,
             bool ref  = ref_fn(y);
             bool test = test_fn(y);
 
-            if (passCount % output_freq == 0 || ref != test) {
+            if (passCount % output_freq == 0 || ref != test || y == yEnd) {
                 std::cout << "\rTested: " << yStart << " to " << y << std::flush;
             }
 
@@ -269,13 +276,10 @@ uint64_t run_search(const char* label,
 
 int run_search_64bit()
 {
-  int64_t EXPECT_FAIL_UP = (1ull << 63) / 21ull + 96ull;
-  int64_t EXPECT_FAIL_DOWN = -EXPECT_FAIL_UP;
-
   uint64_t RANGE_CHECK = (1ll << 32);
 
-  int64_t UP_START   =  EXPECT_FAIL_UP - RANGE_CHECK;
-  int64_t DOWN_START =  EXPECT_FAIL_DOWN + RANGE_CHECK;
+  int64_t UP_START   =  INT64_MAX - RANGE_CHECK;
+  int64_t DOWN_START =  INT64_MIN + RANGE_CHECK;
   int64_t FULL_RANGE =  UP_START - DOWN_START;
 
   int64_t output_freq = 1<<24;
@@ -285,7 +289,7 @@ int run_search_64bit()
     for (uint64_t i = 0; ; ++i) {
       
       if (i > RANGE_CHECK) {
-        std::cout << "\n\033[35mAll passed (unexpected)." << ".\033[0m\n";
+        std::cout << "\n\033[32mTop of range passed." << "\033[0m\n";
         break;
       }
 
@@ -304,13 +308,7 @@ int run_search_64bit()
         std::cout << "First failure at z = " << z << "\n";
         std::cout << "Ben Joffe:      " << (j ? "Leap" : "Non-leap") << "\n";
         std::cout << "Neri-Schneider: " << (h ? "Leap" : "Non-leap")<< "\n";
-        if (z == EXPECT_FAIL_UP) {
-          std::cout << "\033[32mPass: This matches expectations.\033[0m\n";
-        }
-        else {
-          std::cout << "\033[31mFail: This does not match expectations. "
-                    << "Expected " << EXPECT_FAIL_UP << ".\033[0m\n";
-        }
+        std::cout << "\033[31mFail: This does not match expectations. " << ".\033[0m\n";
         break;
       }
     }
@@ -321,7 +319,7 @@ int run_search_64bit()
     for (uint64_t i = 0; ; ++i) {
           
       if (i > RANGE_CHECK) {
-        std::cout << "\n\033[35mAll passed (unexpected)." << ".\033[0m\n";
+        std::cout << "\n\033[32mBottom of range passed." << "\033[0m\n";
         break;
       }
 
@@ -340,13 +338,7 @@ int run_search_64bit()
         std::cout << "First failure at z = " << z << "\n";
         std::cout << "Ben Joffe:      " << (j ? "Leap" : "Non-leap") << "\n";
         std::cout << "Neri-Schneider: " << (h ? "Leap" : "Non-leap")<< "\n";
-        if (z == EXPECT_FAIL_DOWN) {
-          std::cout << "\033[32mPass: This matches expectations.\033[0m\n";
-        }
-        else {
-          std::cout << "\033[31mFail: This does not match expectations. "
-                    << "Expected fail at " << EXPECT_FAIL_DOWN << ".\033[0m\n";
-        }
+        std::cout << "\033[31mFail: This does not match expectations. " << ".\033[0m\n";
         break;
       }      
     }
@@ -375,7 +367,7 @@ int run_search_64bit()
   }
 
   std::cout << "\n" << std::flush;
-  std::cout << "\033[32mPass: All years in range match.\033[0m\n";
+  std::cout << "\033[32mPass: Years around zero passed.\033[0m\n";
 
   std::mt19937_64 rng(std::random_device{}());
   std::uniform_int_distribution<int64_t> dist(DOWN_START, UP_START);
@@ -433,7 +425,6 @@ int run_search_64bit()
 
 int main()
 {
-
   {
     RANDOM_YEARS.reserve(RANDOM_COUNT);
 
