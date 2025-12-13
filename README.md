@@ -1,7 +1,19 @@
 # Fast Date Benchmarks
 
 This repository is a fork of the Neri-Schneider EAF repository, modified as supplementary
-material for the blog post: https://www.benjoffe.com/fast-date.
+material for the following blog posts:
+* https://www.benjoffe.com/fast-date
+* https://www.benjoffe.com/safe-date
+* https://www.benjoffe.com/fast-date-64
+* https://www.benjoffe.com/fast-leap-year
+
+# Open source implementations
+
+| Library      | Language | Author              | Link                                      |
+|------------- |----------|---------------------|-------------------------------------------|
+| [Zeit](https://github.com/rockorager/zeit)         | Zig      | Tim Culverhouse         | [01ae9b9](https://github.com/rockorager/zeit/commit/01ae9b9daf8a6602c8310a9f013ae08b7205bddc) and [7ac64d7](https://github.com/rockorager/zeit/commit/7ac64d72dbfb1a4ad549102e7d4e232a687d32d8) |
+| [fasttime](https://crates.io/crates/fasttime) | Rust | RustedBytes | [RustedBytes/fasttime](https://github.com/RustedBytes/fasttime)
+| go-fast-date | Go       | xnacly              | [xnacly/go-fast-date](https://github.com/xnacly/go-fast-date) |
 
 **Note:** When benchmarking the fastest algorithms against the original Neri-Schneider algorithm,
 if the differences are under ~10% then they may be subject to noise. You can improve reproducibility by editing
