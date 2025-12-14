@@ -52,9 +52,10 @@ struct benjoffe_fast32_wide {
   // Backwards-counting technique explained in:
   // [3] https://www.benjoffe.com/fast-date-64
 
-  static uint32_t constexpr D_SHIFT = 146097*5 - 719162 - 307 + 3845;
-  // Note: 14694 is intentional (see article [2])
-  static uint32_t constexpr Y_SHIFT = 14694*400 + 1;
+  static uint32_t constexpr D_SHIFT = 146097 * 6 - 719162 - 307 + 3845;
+  // Note: 14693 is intentional
+  //       = round((2^31 - 719468)/146097) - 1
+  static uint32_t constexpr Y_SHIFT = 14693 * 400 + 1;
 
   // Bucket technique explained in article [2]
   // Note: when counting backwards, a bucket size can correspond
@@ -76,7 +77,7 @@ struct benjoffe_fast32_wide {
     // 1. Adjust for 100/400 leap year rule.
     // Bucket technique explained in article [2]
     // Reverse day count technique explained in article [3]
-    uint32_t const rev = bucket*BUCK_D - d0 + D_SHIFT;
+    uint32_t const rev = bucket * BUCK_D - d0 + D_SHIFT;
     // Mul-shift to divide by 36524.25 (days per average century):
     uint32_t const cen = rev * uint64_t(C1) >> 47;
     // Julian map technique explained in article [2]:
