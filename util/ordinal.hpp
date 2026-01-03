@@ -8,7 +8,7 @@
 
 struct ordinal32_t {
   int32_t year;
-  uint32_t doy; // day-of-year: 0-indexed (0–364 or 0–365 for leap years)
+  uint32_t ordinal; // day-of-year: 1-indexed (1–365 or 1–366 for leap years)
   bool leap;
 };
 

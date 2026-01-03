@@ -51,21 +51,21 @@ struct ordinal_benjoffe_fast64 {
   static inline
   ordinal32_t to_date(int32_t dayNumber) {
 
-    uint64_t const day = dayNumber + D_SHIFT;
+    uint64_t const day = dayNumber + D_SHIFT;           // Epoch: -XX00-01-01
     uint128_t const c_n = day * uint128_t(CEN_MUL);     // Divide 36524.25
     uint64_t const cen = uint64_t(c_n >> 64);           // Century
     uint64_t const cpt = uint64_t(c_n);                 // Century-part
-    bool const shy = cen % 4 && cpt < CEN_CUT;          // Short Year divisible by 4
+    bool const ijy = cen % 4 == 0 || cpt > CEN_CUT;     // "Is Julian Year"
     uint64_t const jul = day - cen / 4 + cen;           // Julian Map
     uint128_t const y_n = jul * uint128_t(JUL_MUL);     // Divide 365.25
     uint64_t const yrs = uint64_t(y_n >> 64);           // Year
     uint64_t const ypt = uint64_t(y_n);                 // Year-part
-    uint32_t const doy = uint32_t((ypt * uint128_t(1461) >> 66) - shy) + 1;  // Day-of-year
 
     int32_t const year = int32_t(yrs - Y_SHIFT);
-    bool const leap = yrs % 4 == 0 && !shy;
+    uint32_t const ordinal = uint32_t(ypt * uint128_t(1461) >> 66) + ijy;  // Day-of-year
+    bool const leap = (yrs % 4 == 0) && ijy;
 
-    return ordinal32_t{year, doy, leap};
+    return ordinal32_t{year, ordinal, leap};
   }
 
 

@@ -17,12 +17,13 @@
 #include "tests/tests.hpp"
 
 #include "algorithms/baum.hpp"
-#include "algorithms/benjoffe_fast64.hpp"
-#include "algorithms/benjoffe_fast32.hpp"
-#include "algorithms/benjoffe_fast32_wide.hpp"
 #include "algorithms/benjoffe_article_1.hpp"
 #include "algorithms/benjoffe_article_2.hpp"
 #include "algorithms/benjoffe_article_2_l1.hpp"
+#include "algorithms/benjoffe_fast32.hpp"
+#include "algorithms/benjoffe_fast32_wide.hpp"
+#include "algorithms/benjoffe_fast64.hpp"
+#include "algorithms/benjoffe_ordinal_alternative.hpp"
 #include "algorithms/boost.hpp"
 #include "algorithms/boost_benjoffe_1.hpp"
 #include "algorithms/boost_benjoffe_2.hpp"
@@ -82,6 +83,7 @@ using implementations = ::testing::Types<
   benjoffe_fast64,
   benjoffe_fast32,
   benjoffe_fast32_wide,
+  benjoffe_ordinal_alternative,
   benjoffe_article_1,
   benjoffe_article_2,
   benjoffe_article_2_l1,

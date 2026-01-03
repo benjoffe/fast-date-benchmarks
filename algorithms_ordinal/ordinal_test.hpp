@@ -24,10 +24,10 @@ struct ordinal_test {
     int32_t const rd_y0 = benjoffe_fast64::to_rata_die(year, 1, 1);
     int32_t const rd_y1 = benjoffe_fast64::to_rata_die(year + 1, 1, 1);
 
-    uint32_t const doy = uint32_t(dayNumber - rd_y0) + 1;
+    uint32_t const ordinal = uint32_t(dayNumber - rd_y0) + 1;
     bool const leap = (rd_y1 - rd_y0) == 366;
 
-    return ordinal32_t{year, doy, leap};
+    return ordinal32_t{year, ordinal, leap};
   }
 
 }; // struct ordinal_test

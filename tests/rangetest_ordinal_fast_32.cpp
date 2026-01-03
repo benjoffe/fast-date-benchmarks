@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSL-1.0
-// Copyright (c) 2025 Ben Joffe - https://www.benjoffe.com/fast-date-64
+// Copyright (c) 2025 Ben Joffe - https://www.benjoffe.com/fast-ordinal-date
 
 #include "eaf/date.hpp"
 #include "util/ordinal.hpp"
@@ -18,7 +18,7 @@
 inline bool same_ordinal(const ordinal32_t& a, const ordinal32_t& b)
 {
     return a.year == b.year &&
-           a.doy  == b.doy &&
+           a.ordinal  == b.ordinal &&
            a.leap == b.leap;
 }
 
@@ -40,8 +40,8 @@ int main()
 
       if (!same_ordinal(j, h)) {
         std::cout << "\rFirst upward failure at z = " << z << "\n";
-        std::cout << "Ben Joffe:       " << j.year << "-" << j.doy << "-" << (j.leap ? "Leap" : "Non-leap") << "\n";
-        std::cout << "Test (baseline): " << h.year << "-" << h.doy << "-" << (h.leap ? "Leap" : "Non-leap") << "\n";
+        std::cout << "Ben Joffe:       " << j.year << "-" << j.ordinal << "-" << (j.leap ? "Leap" : "Non-leap") << "\n";
+        std::cout << "Test (baseline): " << h.year << "-" << h.ordinal << "-" << (h.leap ? "Leap" : "Non-leap") << "\n";
         sum += z;
         break;
       }
@@ -61,8 +61,8 @@ int main()
 
       if (!same_ordinal(j, h)) {
         std::cout << "\rFirst Downward failure at z = " << z << "\n";
-        std::cout << "Ben Joffe:       " << j.year << "-" << j.doy << "-" << (j.leap ? "Leap" : "Non-leap") << "\n";
-        std::cout << "Test (baseline): " << h.year << "-" << h.doy << "-" << (h.leap ? "Leap" : "Non-leap") << "\n";
+        std::cout << "Ben Joffe:       " << j.year << "-" << j.ordinal << "-" << (j.leap ? "Leap" : "Non-leap") << "\n";
+        std::cout << "Test (baseline): " << h.year << "-" << h.ordinal << "-" << (h.leap ? "Leap" : "Non-leap") << "\n";
 
         sum += -z - 1;
         break;
