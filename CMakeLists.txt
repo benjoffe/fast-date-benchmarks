@@ -81,5 +81,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 add_subdirectory(algorithms)
 add_subdirectory(benchmarks)
-add_subdirectory(paper)
 add_subdirectory(tests)
