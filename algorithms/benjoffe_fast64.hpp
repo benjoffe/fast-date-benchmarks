@@ -40,7 +40,10 @@
 
 struct benjoffe_fast64 {
 
-  // Very fast algorithm.
+  // IMPORTANT: THIS HAS BEEN SUPERSEDED
+  // SEE benjoffe_fast64_v2
+  //
+  // Very fast algorithm (v1)
   // See the following blog post for explanation and benchmark results:
   // https://www.benjoffe.com/fast-date-64
 

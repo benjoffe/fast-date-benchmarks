@@ -2,6 +2,7 @@
 // Copyright (c) 2025 Ben Joffe - https://www.benjoffe.com/fast-date-64
 
 #include "eaf/date.hpp"
+#include "algorithms/_portable_int128.hpp"
 #include "algorithms/_portable_uint128.hpp"
 #include <random>
 #include <stdint.h>
@@ -27,52 +28,41 @@
  */
 inline date64_t benjoffe_fast64_wide(int64_t dayNumber)
 {
-  static uint64_t constexpr ERAS    = 4726498270ull;
-  static uint64_t constexpr D_SHIFT = 146097ull * ERAS - 719469ull;
-  static uint64_t constexpr Y_SHIFT = 400ull * ERAS - 1ull;
+  static uint64_t constexpr ERAS = 7453743012;
+  static uint64_t constexpr BIAS = 5;
 
-#if TEST_IS_ARM
-  static uint32_t constexpr SCALE = 1;
-#else
-  static uint32_t constexpr SCALE = 32;
-  static uint32_t constexpr SHIFT_1 = 5980 * SCALE;
-#endif
+  static int64_t constexpr D_SHIFT = -146097l * ERAS + 719469l;
+  static uint64_t constexpr Y_SHIFT = 400 * ERAS;
 
-  static uint32_t constexpr SHIFT_0 = 30556 * SCALE;
+  static uint64_t constexpr CEN_MUL = 505054698555331ull;          // floor(2^64 / 36524.25)
+  static uint64_t constexpr YRS_MUL = 50504432782230120ull + BIAS; // floor(2^64 / 365.25) + BIAS
+  static uint64_t constexpr DAY_MUL = 2204962377560594841ull;      // floor(2^64 * 30.6 / 256)
+  static uint64_t constexpr YPT_MUL = 3056ull;                     // ceil(365.25 / 30.6 * 256)
+    
+  // Use different variable sizes in some places for optimal codegen.
+  // Does not change any math / overflow characteristics.
+  #if defined(__aarch64__) || defined(_M_ARM64)
+    using uintXX_t = uint64_t;
+  #else
+    using uintXX_t = uint32_t;
+  #endif
 
-  static uint64_t constexpr C1 = 505054698555331ull;
-  static uint64_t constexpr C2 = 50504432782230121ull;
-  static uint64_t constexpr C3 = 8619973866219416ull * 32 / SCALE;  // floor(2^64/2140):
+  int64_t const rev = D_SHIFT + dayNumber;
+  int64_t const cen = CEN_MUL * int128_t(rev) >> 64;
+  int64_t const jul = rev + cen - (cen >> 2);
 
-  uint64_t const rev = D_SHIFT - uint64_t(dayNumber);
-  uint64_t const cen = (uint128_t(C1) * rev) >> 64;
-  uint64_t const jul = rev - cen / 4 + cen;
-
-  uint128_t const num = uint128_t(C2) * jul;
-  uint64_t const yrs = Y_SHIFT - (num >> 64);
+  int128_t const num = int128_t(jul) * YRS_MUL;
+  uint64_t const yrs = uint64_t(num >> 64);
   uint64_t const low = uint64_t(num);
-  uint32_t const ypt = uint32_t((uint128_t(24451 * SCALE) * low) >> 64);
+  uintXX_t const ypt = uintXX_t(low * uint128_t(YPT_MUL) >> 64);
 
-#if TEST_IS_ARM
-  uint32_t const phase = SHIFT_0;
-#else
-  uint32_t const bump = ypt < (3952 * SCALE);
-  uint32_t const phase = bump ? SHIFT_1 : SHIFT_0;
-#endif
+  uintXX_t const bump = ypt > 10u * 256;
+  int32_t const shift = bump ? 765 - 12 * 256 : 765;
 
-  uint32_t const N = (yrs % 4) * (16 * SCALE) + phase - ypt;
-  uint32_t const M = N / (2048 * SCALE);
-  uint32_t const D = uint32_t((uint128_t(C3) * (N % (2048 * SCALE))) >> 64);
-
-#if TEST_IS_ARM
-  uint32_t const bump = M > 12;
-  uint32_t const month = bump ? M - 12 : M;
-#else
-  uint32_t const month = M;
-#endif
-
-  uint32_t const day = D + 1;
-  int64_t const year = int64_t(yrs) + int64_t(bump);
+  uint32_t const N = (yrs & 3) * 2 + ypt + shift;
+  uint32_t const month = N / 256;
+  uint32_t const day = uint32_t(uint64_t((N % 256) * uint128_t(DAY_MUL) >> 64) + 1);
+  int64_t const year = int64_t(yrs + bump + Y_SHIFT);
 
   return date64_t{year, month, day};
 }
@@ -132,8 +122,8 @@ std::string pad2(int x) {
 
 int main()
 {
-  int64_t EXPECT_FAIL_UP =  690527217032722ll;
-  int64_t EXPECT_FAIL_DOWN = -690527216974165ll;
+  int64_t EXPECT_FAIL_UP =  178800658870273;
+  int64_t EXPECT_FAIL_DOWN = -178800658817456;
 
   int64_t RANGE_CHECK = (1ll << 32);
 

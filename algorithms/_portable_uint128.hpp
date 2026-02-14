@@ -74,7 +74,26 @@ inline uint128_t u128_mul64(uint64_t a, uint64_t b) {
 }
 
 #else
-#error "MSVC platform missing 128-bit multiply support."
+
+// Portable fallback: 64×64 → 128 using 32-bit multiplies
+inline uint128_t u128_mul64(uint64_t a, uint64_t b) {
+    uint32_t a_lo = (uint32_t)a, a_hi = (uint32_t)(a >> 32);
+    uint32_t b_lo = (uint32_t)b, b_hi = (uint32_t)(b >> 32);
+
+    uint64_t ll = (uint64_t)a_lo * b_lo;
+    uint64_t lh = (uint64_t)a_lo * b_hi;
+    uint64_t hl = (uint64_t)a_hi * b_lo;
+    uint64_t hh = (uint64_t)a_hi * b_hi;
+
+    uint64_t mid  = lh + (ll >> 32);
+    uint64_t mid2 = (uint64_t)(uint32_t)mid + hl;
+
+    uint128_t r;
+    r.lo = ((uint64_t)(uint32_t)mid2 << 32) | (uint32_t)ll;
+    r.hi = hh + (mid >> 32) + (mid2 >> 32);
+    return r;
+}
+
 #endif
 
 

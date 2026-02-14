@@ -23,6 +23,7 @@
 #include "algorithms/benjoffe_fast32.hpp"
 #include "algorithms/benjoffe_fast32_wide.hpp"
 #include "algorithms/benjoffe_fast64.hpp"
+#include "algorithms/benjoffe_fast64_v2.hpp"
 #include "algorithms/benjoffe_ordinal_alternative.hpp"
 #include "algorithms/boost.hpp"
 #include "algorithms/boost_benjoffe_1.hpp"
@@ -81,6 +82,7 @@ struct algorithm_tests : public ::testing::Test {
 using implementations = ::testing::Types<
   baum,
   benjoffe_fast64,
+  benjoffe_fast64_v2,
   benjoffe_fast32,
   benjoffe_fast32_wide,
   benjoffe_ordinal_alternative,
