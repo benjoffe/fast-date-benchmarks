@@ -73,7 +73,7 @@ struct benjoffe_article_2 {
 
     // Similar to Neri-Scheinder but slightly slower to avoid early overflow:
     uint32_t const year_days = yrs * 365 + yrs / 4 - cen + cen / 4;
-    uint32_t const month_days = (979 * int32_t(month) + shift) / 32;
+    uint32_t const month_days = uint32_t(979 * int32_t(month) + shift) / 32;
     
     return year_days + month_days + day - 2148345369u;
   }

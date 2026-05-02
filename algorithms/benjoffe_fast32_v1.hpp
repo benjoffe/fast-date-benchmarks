@@ -1,6 +1,6 @@
 // Boost Software License - Version 1.0 - August 17th, 2003
 // 
-// Copyright (c) 2025 Ben Joffe - https://www.benjoffe.com/safe-date
+// Copyright (c) 2025 Ben Joffe - https://www.benjoffe.com/fast-date
 // 
 // Permission is hereby granted, free of charge, to any person or organization
 // obtaining a copy of the software and accompanying documentation covered by
@@ -24,8 +24,8 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-#ifndef EAF_ALGORITHMS_BENJOFFE_FAST32_WIDE_H
-#define EAF_ALGORITHMS_BENJOFFE_FAST32_WIDE_H
+#ifndef EAF_ALGORITHMS_BENJOFFE_FAST32_V1_H
+#define EAF_ALGORITHMS_BENJOFFE_FAST32_V1_H
 
 #include "eaf/date.hpp"
 
@@ -37,31 +37,24 @@
 #define IS_ARM 0
 #endif
 
-struct benjoffe_fast32_wide {
+struct benjoffe_fast32_v1 {
 
-  // Fast wide 32-bit algorithm.
-  // Supports full signed 32-bit input range, using
-  // only 32-bit arithmetic.
+  // Very fast 32-bit algorithm.
+  // Not quite as fast as the 64-bit variant, but close.
   //
   // Julian Map technique explained in:
   // [1] https://www.benjoffe.com/fast-date
   //
-  // Bucket technique explained in:
-  // [2] https://www.benjoffe.com/safe-date
-  //
   // Backwards-counting technique explained in:
   // [3] https://www.benjoffe.com/fast-date-64
 
-  static uint32_t constexpr D_SHIFT = 146097 * 6 - 719162 - 307 + 3845;
-  // Note: 14693 is intentional
-  //       = round((2^31 - 719468)/146097) - 1
-  static uint32_t constexpr Y_SHIFT = 14693 * 400 + 1;
-
-  // Bucket technique explained in article [2]
-  // Note: when counting backwards, a bucket size can correspond
-  // to only one 400-year era, instead of 7 as discussed in the article.
-  static uint32_t constexpr BUCK_Y = 400;
-  static uint32_t constexpr BUCK_D = 146097;
+  // Sufficient eras to cover C++ Chrono Year
+  // i.e. support at least -2^16 years:
+  static uint32_t constexpr ERAS = 82;
+  // Rata Die shift:
+  static uint32_t constexpr D_SHIFT = 146097 * ERAS - 719162 - 307;
+  // Year shift:
+  static uint32_t constexpr Y_SHIFT = 400 * ERAS - 1;
 
   static uint32_t constexpr C1 = 3853261555; // floor(2^47*4/146097)
   static uint32_t constexpr C2 = 3010298776; // ceil(2^40*4/1461)
@@ -69,15 +62,10 @@ struct benjoffe_fast32_wide {
 
   static inline
   date32_t to_date(int32_t dayNumber) {
-    
-    uint32_t const d0 = dayNumber + 2147483648;
-
-    uint32_t const bucket = d0 >> 17;
-
+      
     // 1. Adjust for 100/400 leap year rule.
-    // Bucket technique explained in article [2]
     // Reverse day count technique explained in article [3]
-    uint32_t const rev = bucket * BUCK_D - d0 + D_SHIFT;
+    uint32_t const rev = D_SHIFT - dayNumber;
     // Mul-shift to divide by 36524.25 (days per average century):
     uint32_t const cen = rev * uint64_t(C1) >> 47;
     // Julian map technique explained in article [2]:
@@ -85,7 +73,7 @@ struct benjoffe_fast32_wide {
     
     // 2. Determine year and day-of-year using an EAF numerator.
     // Mul-shift to divide by 365.25:
-    uint32_t const yrs = jul * uint64_t(C2) >> 40;
+    uint32_t const yrs = (jul * uint64_t(C2)) >> 40;
     uint32_t const rem = jul - yrs * 1461 / 4;
 
   #if IS_ARM
@@ -111,13 +99,11 @@ struct benjoffe_fast32_wide {
   #endif
 
     uint32_t const day = D + 1;
-    int32_t const year = BUCK_Y*bucket - Y_SHIFT - yrs + bump;
+    int32_t const year = Y_SHIFT - yrs + bump;
 
     return { year, month, day };
   }
 
-  // The below is identical to benjoffe_fast64.hpp
-  // It is therefore excluded in the to_rata_die benchmarks
   static inline
   int32_t to_rata_die(int32_t year, uint32_t month, uint32_t day) {
 
@@ -128,13 +114,13 @@ struct benjoffe_fast32_wide {
 
     // Similar to Neri-Scheinder but slightly slower to avoid early overflow:
     uint32_t const year_days = yrs * 365 + yrs / 4 - cen + cen / 4;
-    uint32_t const month_days = (979 * int32_t(month) + shift) / 32;
+    uint32_t const month_days = uint32_t(979 * int32_t(month) + shift) / 32;
     
     return year_days + month_days + day - 2148345369u;
   }
 
-}; // struct benjoffe_fast32_wide
+}; // struct benjoffe_fast32
 
 #undef IS_ARM
 
-#endif // EAF_ALGORITHMS_BENJOFFE_FAST32_WIDE_H
+#endif // EAF_ALGORITHMS_BENJOFFE_FAST32_V1_H

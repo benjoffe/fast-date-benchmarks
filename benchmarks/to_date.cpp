@@ -15,8 +15,9 @@
 
 #include "algorithms/baum.hpp"
 #include "algorithms/benjoffe_fast64.hpp"
-#include "algorithms/benjoffe_fast32.hpp"
-#include "algorithms/benjoffe_fast32_wide.hpp"
+#include "algorithms/benjoffe_fast32_v1.hpp"
+#include "algorithms/benjoffe_fast32_v1_wide.hpp"
+#include "algorithms/benjoffe_fast32_v2.hpp"
 #include "algorithms/benjoffe_ordinal_alternative.hpp"
 #include "algorithms/benjoffe_article_1.hpp"
 #include "algorithms/benjoffe_article_2.hpp"
@@ -79,8 +80,9 @@ BENCHMARK(time<scan                  >);
 BENCHMARK(time<boost                 >);
 BENCHMARK(time<neri_schneider        >);
 BENCHMARK(time<benjoffe_fast64       >);
-BENCHMARK(time<benjoffe_fast32       >);
-BENCHMARK(time<benjoffe_fast32_wide  >);
+BENCHMARK(time<benjoffe_fast32_v2    >);
+BENCHMARK(time<benjoffe_fast32_v1    >);
+BENCHMARK(time<benjoffe_fast32_v1_wide>);
 BENCHMARK(time<benjoffe_ordinal_alternative>);
 BENCHMARK(time<benjoffe_article_1    >);
 BENCHMARK(time<benjoffe_article_2    >);
